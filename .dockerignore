@@ -1,0 +1,47 @@
+# Игнорируем файлы Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Игнорируем файлы IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Игнорируем временные файлы
+*~
+*.tmp
+*.temp
+
+# Игнорируем документацию
+docs/_build
+
+# Игнорируем файлы базы данных (они будут в volume)
+*.sqlite3
+db.sqlite3
+
+# Игнорируем файлы Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Игнорируем данные (будут в volume)
+data/
