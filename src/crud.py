@@ -71,29 +71,42 @@ class AsyncORM:
     @classmethod
     async def update_task(cls, task_id : int, new_data:TaskUpdateDTO) -> TaskDTO:
         async with async_session_factory() as session:
-            task = await session.get(TaskOrm, task_id)
-            if task:
-                if new_data.title is None:
-                    new_data.title = task.title
-                if new_data.description is None:
-                    new_data.description = task.description
-                if new_data.completed is None:
-                    new_data.completed = task.completed
+            try:
+                task = await session.get(TaskOrm, task_id)
+                if task:
+                    if new_data.title is None:
+                        new_data.title = task.title
+                    if new_data.description is None:
+                        new_data.description = task.description
+                    if new_data.completed is None:
+                        new_data.completed = task.completed
 
-                stmt = (
-                    update(TaskOrm)
-                    .where(TaskOrm.task_id == task_id)
-                    .values(title=new_data.title, description = new_data.description, completed=new_data.completed)
-                )
-                await session.execute(stmt)
-                await session.commit()
-                res = await session.get(TaskOrm, task_id)
-                result_dto = TaskDTO.model_validate(res)
-                return result_dto
-            else: 
-                raise HTTPException(
+                    stmt = (
+                        update(TaskOrm)
+                        .where(TaskOrm.task_id == task_id)
+                        .values(title=new_data.title, description = new_data.description, completed=new_data.completed)
+                    )
+                    await session.execute(stmt)
+                    await session.commit()
+                    res = await session.get(TaskOrm, task_id)
+                    result_dto = TaskDTO.model_validate(res)
+                    return result_dto
+                else: 
+                    raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Задачи с таким ID нет."
+                        )
+                
+            except IntegrityError as e:
+                await session.rollback()
+                
+                # Анализируем текст ошибки для определения конкретного нарушения
+                error_msg = str(e.orig).lower()
+                
+                if "title" in error_msg and "unique" in error_msg:
+                    raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Задачи с таким ID нет."
+                        detail="Задача с таким названием уже существует."
                     )
 
     # ===================== DELETE - УДАЛЕНИЕ =====================
